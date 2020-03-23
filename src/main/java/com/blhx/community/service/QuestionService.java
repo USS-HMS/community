@@ -1,5 +1,6 @@
 package com.blhx.community.service;
 
+import com.blhx.community.dto.PageinationDTO;
 import com.blhx.community.dto.QuestionDTO;
 import com.blhx.community.mapper.QuestionMapper;
 import com.blhx.community.mapper.UserMapper;
@@ -18,16 +19,23 @@ public class QuestionService {
     private QuestionMapper questionMapper;
     @Autowired
     private UserMapper userMapper;
-    public List<QuestionDTO> list ( ){
-    List<Question> questions= questionMapper.list();
-    List<QuestionDTO> questionDTOList=new ArrayList<>();
+
+    public PageinationDTO list ( Integer page, Integer size ){
+        Integer offset=size * (page - 1);
+        List<Question> questions=questionMapper.list(offset, size);
+        List<QuestionDTO> questionDTOList=new ArrayList<>();
+
+        PageinationDTO pageinationDTO=new PageinationDTO();
         for (Question question : questions) {
             User user=userMapper.findBYID(question.getCreator());
             QuestionDTO questionDTO=new QuestionDTO();
-            BeanUtils.copyProperties(question,questionDTO);
+            BeanUtils.copyProperties(question, questionDTO);
             questionDTO.setUser(user);
             questionDTOList.add(questionDTO);
         }
-        return questionDTOList;
+        pageinationDTO.setQuestions(questionDTOList);
+        Integer totalCount=questionMapper.count();
+        pageinationDTO.setPagination(totalCount,page,size);
+        return pageinationDTO;
     }
 }

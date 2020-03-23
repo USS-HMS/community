@@ -1,10 +1,9 @@
 package com.blhx.community.controller;
 
-import com.blhx.community.dto.QuestionDTO;
+import com.blhx.community.dto.PageinationDTO;
 import com.blhx.community.mapper.UserMapper;
 import com.blhx.community.model.User;
 import com.blhx.community.service.QuestionService;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 @Controller
 public class IndexController {
@@ -25,7 +22,9 @@ public class IndexController {
 
     @GetMapping("/")
     public String hello( HttpServletRequest request
-                        ,Model model){
+                        ,Model model
+                        ,@RequestParam(value="page",defaultValue="1") Integer page
+                        ,@RequestParam(value="size",defaultValue="5") Integer size){
         Cookie[] cookies=request.getCookies();
         if (cookies !=null && cookies.length !=0)
         for (Cookie cookie :cookies){
@@ -38,8 +37,8 @@ public class IndexController {
                 break;
             }
         }
-        List<QuestionDTO> questionList =questionService.list();
-        model.addAttribute("questions",questionList);
+        PageinationDTO pageination =questionService.list(page,size);
+        model.addAttribute("pageination",pageination);
         return "index";
     }
 }
